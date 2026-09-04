@@ -1,6 +1,6 @@
 Divido
 
-A receipt-splitting app for group dining. Scan a receipt, join a shared session with everyone at the table, and each person claims what they had — Divido handles the maths.
+A receipt-splitting app for group dining. Scan a receipt, join a shared session with everyone at the table, and each person claims what they had, Divido does the rest.
 
 How it works
 Scan — a receipt photo is run through on-device OCR (Google ML Kit) to extract words and their positions.
