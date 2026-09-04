@@ -23,27 +23,45 @@ export default function SplitScreen({route, navigation}){
     return () => backHandler.remove()
     }, [])
 
-  const claimItem = async (item) => {
-  const sessionRef = doc(db, 'sessions', session)
-  const claimed = item.claimedBy.some(c => c.uid === uid)
+  const updateClaim = async (item, delta) => {
+    const sessionRef = doc(db, 'sessions', session)
+    const existingClaim = item.claimedBy.find(c => c.uid === uid)
+    const currentQty = existingClaim ? existingClaim.qty : 0
 
-  const updatedItems = items.map(i => {
-    if (i.id !== item.id) return i
-    return {
-      ...i,
-      claimedBy: claimed ? i.claimedBy.filter(c => c.uid !== uid) : [...i.claimedBy, {name:name, uid:uid}]
+    const totalClaimedByOthers = item.claimedBy
+      .filter(c => c.uid !== uid)
+      .reduce((sum, c) => sum + c.qty, 0)
+
+    const itemQty = item.quantity ?? 1
+    const remaining = itemQty - totalClaimedByOthers - currentQty
+    const newQty = currentQty + delta
+
+    if (newQty < 0) return
+    if (delta > 0 && remaining <= 0) return
+
+    let updatedClaimedBy
+    if (newQty === 0) {
+      updatedClaimedBy = item.claimedBy.filter(c => c.uid !== uid)
+    } else if (existingClaim) {
+      updatedClaimedBy = item.claimedBy.map(c => c.uid === uid ? {...c, qty: newQty} : c)
+    } else {
+      updatedClaimedBy = [...item.claimedBy, {name: name, uid: uid, qty: newQty}]
     }
-  })
 
-  await updateDoc(sessionRef, { items: updatedItems })
-}
+    const updatedItems = items.map(i => i.id === item.id ? {...i, claimedBy: updatedClaimedBy} : i)
 
-    const userTotal = items.reduce((sum, item) => {
-        if (item.claimedBy.some(c => c.uid === uid)){
-            return sum + (Number(item.price) / item.claimedBy.length)
-        }
-        return sum
-    },0)
+    await updateDoc(sessionRef, { items: updatedItems })
+  }
+
+  const userTotal = items.reduce((sum, item) => {
+      const myClaim = item.claimedBy.find(c => c.uid === uid)
+      if (!myClaim) return sum
+
+      const totalClaimedQty = item.claimedBy.reduce((s, c) => s + c.qty, 0)
+      const pricePerUnit = Number(item.price) / (item.quantity ?? 1)
+
+      return sum + (pricePerUnit * myClaim.qty)
+  },0)
 
     return(
         <View style={styles.container}>
@@ -55,27 +73,46 @@ export default function SplitScreen({route, navigation}){
                 keyExtractor={item => item.id}
                 style={styles.list}
                 renderItem={({item}) => {
-                    const alreadyClaim = item.claimedBy.some(c => c.uid === uid)
-                    const splitPrice = item.claimedBy.length > 0 ? Number(item.price) / item.claimedBy.length : Number(item.price)
+                  const myClaim = item.claimedBy.find(c => c.uid === uid)
+                  const myQty = myClaim ? myClaim.qty : 0
+                  const totalClaimedQty = item.claimedBy.reduce((sum, c) => sum + c.qty, 0)
+                  const itemQty = item.quantity ?? 1
+                  const remaining = itemQty - totalClaimedQty
 
-                    return (
-                        <TouchableOpacity onPress={() => claimItem(item)} style={alreadyClaim && styles.itemRowClaimed}>
-                            <View style={styles.itemRow}>
-                                <View style={styles.itemInfo}> 
-                                    <Text style={styles.itemName}>
-                                     {item.name}
-                                    </Text>
-                                    <Text style={styles.itemPrice}>
-                                        £{splitPrice.toFixed(2)}
-                                    </Text>
-                                </View>
-                                <Text>
-                                    {item.claimedBy.length > 0 ? item.claimedBy.map(c => c.name).join(', ') : 'unclaimed'}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    )
-                }}
+                  return (
+                      <View style={[styles.itemRow, myQty > 0 && styles.itemRowClaimed]}>
+                          <View style={styles.itemInfo}>
+                              <Text style={styles.itemName}>{item.name}</Text>
+                              <Text style={styles.itemPrice}>£{Number(item.price).toFixed(2)} · {remaining} left</Text>
+                              <Text style={styles.claimedBy}>
+                                  {item.claimedBy.length > 0
+                                    ? item.claimedBy.map(c => `${c.name} (${c.qty})`).join(', ')
+                                    : 'unclaimed'}
+                              </Text>
+                          </View>
+
+                          <View style={styles.stepper}>
+                              <TouchableOpacity
+                                onPress={() => updateClaim(item, -1)}
+                                disabled={myQty === 0}
+                                style={[styles.stepperButton, myQty === 0 && styles.stepperButtonDisabled]}
+                              >
+                                  <Text style={styles.stepperButtonText}>−</Text>
+                              </TouchableOpacity>
+
+                              <Text style={styles.stepperQty}>{myQty}</Text>
+
+                              <TouchableOpacity
+                                onPress={() => updateClaim(item, 1)}
+                                disabled={remaining === 0}
+                                style={[styles.stepperButton, remaining === 0 && styles.stepperButtonDisabled]}
+                              >
+                                  <Text style={styles.stepperButtonText}>+</Text>
+                              </TouchableOpacity>
+                          </View>
+                      </View>
+                  )
+              }}
             />
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>your total</Text>
@@ -164,6 +201,33 @@ button: {
 buttonText: {
   color: '#fff',
   fontSize: 16,
+},
+stepper: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 12,
+},
+stepperButton: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: '#1a1a2e',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+stepperButtonDisabled: {
+  backgroundColor: '#ccc',
+},
+stepperButtonText: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: '600',
+},
+stepperQty: {
+  fontSize: 16,
+  fontWeight: '600',
+  minWidth: 20,
+  textAlign: 'center',
 },
 
 });

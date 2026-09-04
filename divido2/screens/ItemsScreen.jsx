@@ -3,91 +3,18 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig'
 import { doc, updateDoc } from 'firebase/firestore'
 
-const readItems = (lines) => {
-  console.log('raw lines:', lines)
-  const priceRegex = /[£E]?(\d+\.?\s*\d{2})/
-  const standalonePriceRegex = /^[£E2]?(\d+\.?\s*\d{2})\s*[A-Z]?$/
-  const skipWords = [
-    'total', 'subtotal', 'tax', 'vat', 'cash', 'change',
-    'receipt', 'non vat', 'card', 'gross', 'net',
-    'qty', 'description', 'rate', 'price', 'item', 'guests',
-    'sales', 'last', 'tbl', 'chk', 'no of', 'restaurant'
-  ]
-
-  const skipPatterns = [
-    /^\*/, //lines like '* bbq'
-    /^\d{2}\/\d{2}\/\d{4}/, //dates
-    /^#/, //headers like #1
-    /^\d+$/, // stand alone numbers 
-    /^[A-Z][a-z]+$/,// single capatalised words
-    /^O\.\d{2}$/,// ocr misread
-    /^0\.00$/,// 0.00
-    /^\d+\s+@\s+[\d.]+$/,// 2 @ 15.50
-    /^\d+@/,// 2@
-    /^\d+[\(\.\)]+$/, // catches any combination of digits with brackets and dots
-    /^\d+\(\.?\)$/,
-    /^[\)\s]+$/,
-    ]
-
-  const names = []
-  const prices = []
-
-  for (let line of lines){
-    const trimmed = line.trim()
-    if (trimmed.length < 3 ){
-      continue
-    } 
-    if (skipPatterns.some(pattern => pattern.test(trimmed))){
-      continue
-    }
-    if (skipWords.some(word => trimmed.toLowerCase().includes(word))){
-      continue
-    }
-
-    if (trimmed.toLowerCase().includes('service charge')) {
-      names.push('Service Charge')
-      continue
-    }
-
-
-    const doublePrice = trimmed.match(/^[\d\s]*(\d+\.\d{2})\s+\1$/)
-    if (doublePrice) {
-      prices.push(parseFloat(doublePrice[1]))
-      continue
-    }
-
-
-    const normalised = trimmed.replace(',','.')
-    const priceMatch = normalised.match(priceRegex)
-    if (priceMatch){
-      if (standalonePriceRegex.test(normalised))
-        {prices.push(parseFloat(priceMatch[1].replace(/\s/g,'')))}
-      
-    }
-    else{
-        let cleanName = trimmed
-        const menuPrefix = trimmed.match(/^\d+\.\s+(.+)/i)
-        if (menuPrefix) {
-          cleanName = menuPrefix[1].trim()
-        }
-
-        if (cleanName.length > 1 && !/^[-*#]+$/.test(cleanName)) {
-          names.push(cleanName)
-        }
-      }
-    }
-    return names.map((name,index)=> ({
-    id: index.toString(),
-    name: name,
-    price : prices[index] ?? 0,
-  }))
-}
-
-
 export default function ItemsScreen({route, navigation}){
 
-    const {rawText, session, name, uid} = route.params;
-    const [items, setItems] = useState(readItems(rawText));
+    const {extractedData, session, name, uid} = route.params;
+
+    const initialItems = (extractedData?.items || []).map((item, index) => ({
+      id: index.toString(),
+      name: item.name,
+      price: parseFloat((item.line_total || item.unit_price || '0').replace(/[^0-9.]/g, '')) || 0,
+      quantity: parseInt(item.quantity) || 1,
+    }));
+
+    const [items, setItems] = useState(initialItems);
     const [editingId, setEditingId] = useState(null);
 
     const deleteItem = (id) => {
@@ -102,6 +29,7 @@ export default function ItemsScreen({route, navigation}){
       await updateDoc(doc(db, 'sessions', session),{
         items: items.map(item => ({
           ...item,
+          quantity: parseInt(item.quantity) || 1,
           claimedBy: []
         }))
       })
@@ -144,6 +72,12 @@ export default function ItemsScreen({route, navigation}){
                             keyboardType='numeric'
                             onChangeText={(text) => setItems(items.map(i => i.id === item.id ? {...i, price: (text)} : i))}
                           />
+                          <TextInput
+                            style={[styles.itemPrice, styles.editInput]}
+                            value = {item.quantity.toString()}
+                            keyboardType='numeric'
+                            onChangeText={(text) => setItems(items.map(i => i.id === item.id ? {...i, quantity: (text)} : i))}
+                          />
                           <TouchableOpacity onPress={() => setEditingId(null)} style={styles.saveButton}>
                             <Text style={styles.saveText}>✓</Text>
                           </TouchableOpacity>
@@ -154,7 +88,7 @@ export default function ItemsScreen({route, navigation}){
                                   {item.name}
                                 </Text>
                                 <Text style={styles.itemPrice}>
-                                    £{Number(item.price).toFixed(2)}
+                                    £{Number(item.price).toFixed(2)} · qty {item.quantity}
                                 </Text>
                               </TouchableOpacity> 
               
@@ -185,6 +119,7 @@ export default function ItemsScreen({route, navigation}){
                 <Text style={styles.buttonText}>
                     Confirm items
                 </Text>
+
             </TouchableOpacity>
 
         </View>

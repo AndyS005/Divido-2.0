@@ -1,0 +1,10 @@
+divido2/OcrBackend/checkpoint-700/model.safetensors
+divido2/OcrBackend/checkpoint-700/scaler.pt
+divido2/OcrBackend/checkpoint-700/scheduler.pt
+divido2/OcrBackend/checkpoint-700/tokenizer.json
+divido2/OcrBackend/checkpoint-700/rng_state.pth
+divido2/OcrBackend/checkpoint-700/tokenizer_config.json
+divido2/OcrBackend/checkpoint-700/trainer_state.json
+divido2/OcrBackend/checkpoint-700/training_args.bin
+divido2/OcrBackend/checkpoint-700/processor_config.json
+divido2/OcrBackend/checkpoint-700/config.json

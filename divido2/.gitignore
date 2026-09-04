@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+divido2/OcrBackend/checkpoint-700/
+divido2/OcrBackend/__pycache__/
+*.pyc
