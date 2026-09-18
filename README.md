@@ -1,4 +1,4 @@
-Divido
+<img width="777" height="1600" alt="image" src="https://github.com/user-attachments/assets/f71f6c5f-0e91-48ee-ad72-518b8d9ef4ad" />Divido
 
 A receipt-splitting app for group dining. Scan a receipt, join a shared session with everyone at the table, and each person claims what they had, Divido does the rest.
 
@@ -12,3 +12,13 @@ Stack
 App: React Native (Expo), Firebase Firestore for real-time session sync, Google ML Kit for on-device OCR
 Backend: Python, FastAPI, serving a fine-tuned LayoutLMv3 model (Hugging Face Transformers)
 Model: LayoutLMv3, fine-tuned on the CORD receipt dataset for token-level extraction (item name, quantity, unit price, line total, discount, subtotal, service charge, total)
+
+<img width="775" height="1600" alt="image" src="https://github.com/user-attachments/assets/87df6ff9-02dd-4b87-aa09-b68fc6de4b51" />
+
+<img width="777" height="1600" alt="image" src="https://github.com/user-attachments/assets/b74febc4-32c8-4716-9b8b-884cbdde7387" />
+
+<img width="777" height="1600" alt="image" src="https://github.com/user-attachments/assets/40cb670c-eb56-4237-982d-6273d0f3aa01" />
+
+<img width="772" height="1600" alt="image" src="https://github.com/user-attachments/assets/90800cf2-1206-4986-b0d9-5c5713ac6e02" />
+
+
