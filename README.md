@@ -1,4 +1,3 @@
-<img width="777" height="1600" alt="image" src="https://github.com/user-attachments/assets/f71f6c5f-0e91-48ee-ad72-518b8d9ef4ad" />Divido
 
 A receipt-splitting app for group dining. Scan a receipt, join a shared session with everyone at the table, and each person claims what they had, Divido does the rest.
 
