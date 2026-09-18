@@ -117,7 +117,6 @@ export default function ScanScreen({navigation, route}){
             <Text style={styles.title}>Scan your receipt</Text>
             <Text style={styles.subtitle}>Take a photo or upload from gallery</Text>
             <Text style={styles.subtitle}>💡 For best performance please crop only items and prices💡</Text>
-            <Text style={styles.subtitle}> 💡 Exclude totals and subtotal if possible💡</Text>
             {image ? (
                 <View style={{ width: '100%', gap: 12 }}>
                     <Image source={{uri:image}} style={{width: '100%', height: 400, borderRadius: 12}}/>
