@@ -14,10 +14,10 @@ Model: LayoutLMv3, fine-tuned on the CORD receipt dataset for token-level extrac
 
 <table>
   <tr>
-    <td><img width="200" alt="Scan receipt" src="https://github.com/user-attachments/assets/87df6ff9-02dd-4b87-aa09-b68fc6de4b51" /></td>
-    <td><img width="200" alt="Session code" src="https://github.com/user-attachments/assets/b74febc4-32c8-4716-9b8b-884cbdde7387" /></td>
-    <td><img width="200" alt="Claim items" src="https://github.com/user-attachments/assets/90800cf2-1206-4986-b0d9-5c5713ac6e02" /></td>
-    <td><img width="200" alt="Bill summary" src="https://github.com/user-attachments/assets/40cb670c-eb56-4237-982d-6273d0f3aa01" /></td>
+    <td><img width="200"  src="https://github.com/user-attachments/assets/87df6ff9-02dd-4b87-aa09-b68fc6de4b51" /></td>
+    <td><img width="200"  src="https://github.com/user-attachments/assets/b74febc4-32c8-4716-9b8b-884cbdde7387" /></td>
+    <td><img width="200"  src="https://github.com/user-attachments/assets/40cb670c-eb56-4237-982d-6273d0f3aa01" /></td>
+    <td><img width="200"  src="https://github.com/user-attachments/assets/90800cf2-1206-4986-b0d9-5c5713ac6e02" /></td>
   </tr>
 </table>
 
