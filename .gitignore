@@ -8,3 +8,4 @@ divido2/OcrBackend/checkpoint-700/trainer_state.json
 divido2/OcrBackend/checkpoint-700/training_args.bin
 divido2/OcrBackend/checkpoint-700/processor_config.json
 divido2/OcrBackend/checkpoint-700/config.json
+divido2/.env
